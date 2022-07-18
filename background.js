@@ -19,7 +19,7 @@ chrome.contextMenus.onClicked.addListener( ( info, tab ) => {
 } );
 
 const notify = message => {
-	var urlBase = 'https://83lzgyybz3.execute-api.us-east-1.amazonaws.com/Prod/comprehend-api?';
+	var urlBase = 'https://8r9rond8o8.execute-api.us-west-2.amazonaws.com/Prod/comprehend-api?';
 	fetch(urlBase + 'message="' + message + '"')
 		.then(r => r.text())
 		.then(response => {
@@ -30,9 +30,14 @@ const notify = message => {
 			} );
 
 			// transform response to result
-			result = response;
-			//returns "May contain suicidal content" if suicidal rate > nonsuicidal rate
-			//returns "All clear" else
+			var parsed = JSON.parse(response);
+			result = parsed.Classes[0].Name;
+			if ( result === 'suicide' ) {
+				result = "CONTENT WARNING: Text may contain suicidal content"
+			}
+			else {
+				result = "All clear!"
+			}
 
 			// create notification with result
 			return chrome.notifications.create(
