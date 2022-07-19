@@ -69,5 +69,8 @@ const notify = message => {
 					iconUrl: './assets/icons/128.png',
 				}
 			);
+
 	})
 };
+
+console.log(notify.message);
