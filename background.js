@@ -20,20 +20,12 @@ chrome.tabs.onActivated.addListener( function(activeInfo){
 });
 
 function blurring() {
-    function toggleElementBlur(elm) {
-        var elmBlurLevel = "10px";
-        elm.style.WebkitFilter = "blur(" + elmBlurLevel + ")";
-    };
-    toggleElementBlur(document.querySelector("*"));
+    document.querySelector("*").style.WebkitFilter = "blur(10px)";
 }
 
 function unblur() {
-	function toggleElementUnblur(elm) {
-        var elmBlurLevel = "0px";
-        elm.style.WebkitFilter = "blur(" + elmBlurLevel + ")";
-    };
-	if ( window.confirm("May contain suicidal content. View anyway?") ) {
-		toggleElementUnblur(document.querySelector("*"));
+    if ( window.confirm("May contain suicidal content. View anyway?") ) {
+		document.querySelector("*").style.WebkitFilter = "blur(0px)";
 	}
 }
 
@@ -44,7 +36,7 @@ chrome.webNavigation.onCompleted.addListener(function(details) {
         // Fires only when details.url === currentTab.url
         chrome.tabs.get(details.tabId, function(tab) {
             if(tab.url === details.url) {
-                console.log('You should see me once.');
+                // console.log('You should see me once.');
 				chrome.scripting.executeScript({
 					target: { tabId: current_tab},
 					files: ['content.js']
@@ -53,18 +45,6 @@ chrome.webNavigation.onCompleted.addListener(function(details) {
         });
     }
 });
-
-// var fired = 0;
-// chrome.tabs.onUpdated.addListener(function(tabId, info) {
-// 	fired += 1;
-// 	if (info.status === "complete" && fired % 2 == 0) {
-// 		// console.log('You should see me once.');
-// 		chrome.scripting.executeScript({
-// 			target: { tabId: current_tab},
-// 			files: ['content.js']
-// 		})
-// 	}
-// });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 	if (request.type === 'get_text') {
@@ -92,7 +72,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 				// console.log('You should see me once.');
 
-		
 				// create notification with result
 				return chrome.notifications.create(
 					'',
