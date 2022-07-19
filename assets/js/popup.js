@@ -42,4 +42,4 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 		text.innerText = request.data;
 		return true;
 	  }
-	});
+});
