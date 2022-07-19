@@ -12,11 +12,27 @@ chrome.runtime.onInstalled.addListener( () => {
 	});
 });
 
+var current_tab;
+chrome.tabs.onActivated.addListener( function(activeInfo){
+    chrome.tabs.get(activeInfo.tabId, function(tab){
+        current_tab = tab.id;
+        console.log("you are here: "+ current_tab);
+    });
+});
+
 chrome.contextMenus.onClicked.addListener( ( info, tab ) => {
 	if ( 'notify' === info.menuItemId ) {
 		notify( info.selectionText );
 	}
 } );
+
+function blurring() {
+    function toggleElementBlur(elm) {
+        var elmBlurLevel = "10px";
+        elm.style.WebkitFilter = "blur(" + elmBlurLevel + ")";
+    };
+    toggleElementBlur(document.querySelector("*"));    
+}
 
 const notify = message => {
 	var urlBase = 'https://8r9rond8o8.execute-api.us-west-2.amazonaws.com/Prod/comprehend-api?';
@@ -32,15 +48,16 @@ const notify = message => {
 			// transform response to result
 			var parsed = JSON.parse(response);
 			result = parsed.Classes[0].Name;
-			
 			if ( result === 'suicide' ) {
-                result = "CONTENT WARNING: Text may contain suicidal content";
-            }
-            else {
-                result = "All clear!"
+				result = "CONTENT WARNING: Text may contain suicidal content"
+				chrome.scripting.executeScript({
+					target: { tabId: current_tab},
+					function: blurring
+				});
 			}
-			//returns "May contain suicidal content" if suicidal rate > nonsuicidal rate
-			//returns "All clear" else
+			else {
+				result = "All clear!"
+			}
 
 			// create notification with result
 			return chrome.notifications.create(
