@@ -31,7 +31,17 @@ function blurring() {
         var elmBlurLevel = "10px";
         elm.style.WebkitFilter = "blur(" + elmBlurLevel + ")";
     };
-    toggleElementBlur(document.querySelector("*"));    
+    toggleElementBlur(document.querySelector("*"));
+}
+
+function unblur() {
+	function toggleElementUnblur(elm) {
+        var elmBlurLevel = "0px";
+        elm.style.WebkitFilter = "blur(" + elmBlurLevel + ")";
+    };
+	if ( window.confirm("May contain suicidal content. View anyway?") ) {
+		toggleElementUnblur(document.querySelector("*"));
+	}
 }
 
 const notify = message => {
@@ -54,6 +64,12 @@ const notify = message => {
 					target: { tabId: current_tab},
 					function: blurring
 				});
+				// if ( window.confirm("May contain suicidal content. View anyway?") ) {
+				chrome.scripting.executeScript({
+					target: {tabId: current_tab},
+					function: unblur
+				});
+				// }
 			}
 			else {
 				result = "All clear!"
@@ -73,4 +89,4 @@ const notify = message => {
 	})
 };
 
-console.log(notify.message);
+
