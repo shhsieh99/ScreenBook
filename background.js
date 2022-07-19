@@ -4,15 +4,6 @@ chrome.runtime.onMessage.addListener( data => {
 	}
 });
 
-// chrome.runtime.onInstalled.addListener( () => {
-// 	chrome.contextMenus.create({
-// 		id: 'notify',
-// 		title: "Notify!: %s", 
-// 		contexts:[ "selection" ]
-// 	});
-// });
-
-
 async function getCurrentTab() {
 	let queryOptions = { active: true, lastFocusedWindow: true };
 	// `tab` will either be a `tabs.Tab` instance or `undefined`.
@@ -20,19 +11,13 @@ async function getCurrentTab() {
 	return tab;
   }
 
-  var current_tab = getCurrentTab();
-  chrome.tabs.onActivated.addListener( function(activeInfo){
-	  chrome.tabs.get(activeInfo.tabId, function(tab){
-		  current_tab = tab.id;
-		  console.log("you are here: "+ current_tab);
-	  });
-  });
-
-// chrome.contextMenus.onClicked.addListener( ( info, tab ) => {
-// 	if ( 'notify' === info.menuItemId ) {
-// 		notify( info.selectionText );
-// 	}
-// } );
+var current_tab = getCurrentTab();
+chrome.tabs.onActivated.addListener( function(activeInfo){
+	chrome.tabs.get(activeInfo.tabId, function(tab){
+		current_tab = tab.id;
+		// console.log("you are here: "+ current_tab);
+	});
+});
 
 function blurring() {
     function toggleElementBlur(elm) {
@@ -52,15 +37,34 @@ function unblur() {
 	}
 }
 
-chrome.tabs.onUpdated.addListener(function(tabId, info) {
-	if (info.status === "complete") {
-		// let [tab] = chrome.tabs.query({ active: true, currentWindow: true });
-		chrome.scripting.executeScript({
-			target: { tabId: current_tab},
-			files: ['content.js']
-		})
-	}
+// console.log("You should see me once.");
+
+chrome.webNavigation.onCompleted.addListener(function(details) {
+    if(details.frameId === 0) {
+        // Fires only when details.url === currentTab.url
+        chrome.tabs.get(details.tabId, function(tab) {
+            if(tab.url === details.url) {
+                console.log('You should see me once.');
+				chrome.scripting.executeScript({
+					target: { tabId: current_tab},
+					files: ['content.js']
+				});
+            }
+        });
+    }
 });
+
+// var fired = 0;
+// chrome.tabs.onUpdated.addListener(function(tabId, info) {
+// 	fired += 1;
+// 	if (info.status === "complete" && fired % 2 == 0) {
+// 		// console.log('You should see me once.');
+// 		chrome.scripting.executeScript({
+// 			target: { tabId: current_tab},
+// 			files: ['content.js']
+// 		})
+// 	}
+// });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 	if (request.type === 'get_text') {
@@ -68,15 +72,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 		fetch(urlBase + 'message="' + request.data + '"')
 			.then(r => r.text())
 			.then(response => {
-				// update notification count
-				// chrome.storage.local.get( ['notifyCount'], data => {
-				// 	let value = data.notifyCount || 0;
-				// 	chrome.storage.local.set({ 'notifyCount': Number( value ) + 1 });
-				// } );
-
-				// transform response to result
 				var parsed = JSON.parse(response);
 				result = parsed.Classes[0].Name;
+
 				if ( result === 'suicide' ) {
 					result = "CONTENT WARNING: Text may contain suicidal content"
 					chrome.scripting.executeScript({
@@ -92,6 +90,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 					result = "All clear!"
 				}
 
+				// console.log('You should see me once.');
+
+		
 				// create notification with result
 				return chrome.notifications.create(
 					'',
@@ -102,7 +103,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 						iconUrl: './assets/icons/128.png',
 					}
 				);
-
 		})
 	}
 });

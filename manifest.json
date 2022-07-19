@@ -16,7 +16,8 @@
 		"downloads",
 		"contextMenus",
 		"notifications",
-		"storage"
+		"storage",
+		"webNavigation"
 	],
 	"background": {
 		"service_worker": "background.js"
