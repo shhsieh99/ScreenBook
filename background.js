@@ -1,9 +1,3 @@
-chrome.runtime.onMessage.addListener( data => {
-	if ( data.type === 'notification' ) {
-		notify( data.message );
-	}
-});
-
 async function getCurrentTab() {
 	let queryOptions = { active: true, lastFocusedWindow: true };
 	// `tab` will either be a `tabs.Tab` instance or `undefined`.
@@ -20,14 +14,25 @@ chrome.tabs.onActivated.addListener( function(activeInfo){
 });
 
 function blurring() {
-    document.querySelector("*").style.WebkitFilter = "blur(10px)";
+	// console.log("entered blurring function");
+    document.querySelector("body").style.filter = "blur(10px)";
+	// console.log("ran blurring");
+	window.requestAnimationFrame(() => {
+		window.requestAnimationFrame(() => {
+			if (window.confirm("May contain suicidal content. View anyway?") ) {
+				// console.log("created popup");
+				document.querySelector("body").style.filter = "blur(0px)";
+				// console.log("unblurred");
+			}
+		});
+	});
 }
 
-function unblur() {
-    if ( window.confirm("May contain suicidal content. View anyway?") ) {
-		document.querySelector("*").style.WebkitFilter = "blur(0px)";
-	}
-}
+// function unblur() {
+// 	if (window.confirm("May contain suicidal content. View anyway?") ) {
+// 		document.querySelector("*").style.WebkitFilter = "blur(0px)";
+// 	}
+// }
 
 // console.log("You should see me once.");
 
@@ -61,10 +66,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 						target: { tabId: current_tab},
 						function: blurring
 					});
-					chrome.scripting.executeScript({
-						target: {tabId: current_tab},
-						function: unblur
-					});
+					// chrome.scripting.executeScript({
+					// 	target: {tabId: current_tab},
+					// 	function: unblur
+					// });
 				}
 				else {
 					result = "All clear!"
